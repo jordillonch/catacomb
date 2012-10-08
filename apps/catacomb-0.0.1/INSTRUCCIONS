@@ -9,8 +9,17 @@ c(ct_god).
 c(ct_config).
 
 ct_root_sup:start_link().
+(CONNECTAR EL XAT)
 ct_god:init_map().
 {ok,JoanPlayer}=ct_player_sup:start_player("joan",self(),[]).
+
+{_,_,PlayerPid,_,_,_,_,_,_,_} = JoanPlayer.
+register(player_test, PlayerPid).
+ct_player:ws_send_test(JoanPlayer, "abc").
+
+(FI TEST)
+
+
 {ok,PerePlayer}=ct_player_sup:start_player("pere",self(),[]).
 ct_player:set_room(JoanPlayer,[3,3]).
 ct_player:set_room(PerePlayer,[3,3]).

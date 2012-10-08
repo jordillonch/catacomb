@@ -5,6 +5,7 @@
 -export([get_handler/1,is_player/1,get_pid/1,get_name/1,get_max_life_points/1,get_life_points/1]).
 -export([go/2, set_room/2,seen/2,unseen/2,entered/4,leave_denied/1]).
 -export([init/1,handle_cast/2,handle_call/3,terminate/2,code_change/3,handle_info/2]).
+-export([set_client_pid/2, ws_send_test/2]).
 
 -record(player_state,{id,
 	my_pid,
@@ -35,6 +36,11 @@ start_link(Name, Params) ->
 	[ClientPid|_]=Params, 
     gen_server:start_link(?MODULE,{Name,ClientPid, Params}, []).
 
+set_client_pid(PlayerPid, ClientPid) ->
+	%gen_server:call(ct_player:get_pid(Player), {set_client_pid, ClientPid}).
+	gen_server:call(PlayerPid, {set_client_pid, ClientPid}).
+ws_send_test(Player, Msg) ->
+	gen_server:cast(ct_player:get_pid(Player), {ws_send_test, Msg}).
 %% Client API
 go(Player,Direction) ->
     gen_server:cast(ct_player:get_pid(Player), {go, Direction}).
@@ -83,10 +89,17 @@ handle_cast({entered, RoomPid, RoomExits, RoomName}, State) ->
 handle_cast({leave_denied},State) ->
 	io:format("~s has hit with a wall ~n", [State#player_state.name]),
 	{noreply,State};
-handle_cast(stop, State) -> {stop, normal, State}.
+handle_cast(stop, State) -> {stop, normal, State};
+handle_cast({ws_send_test, Msg}, State) -> 
+	ct_yaws_catacomb_ws_endpoint:say_hi(State#player_state.client_pid, Msg), 
+	{noreply, State}.
 
 handle_call({get_handler},_From,State) -> 
-	{reply,State,State}.
+	{reply,State,State};
+handle_call({set_client_pid, ClientPid}, _From, State) ->
+    State2 = State#player_state{client_pid=ClientPid},
+	{reply,State2,State2}.
+
 
 %% System callbacks
 terminate(_Reason, State) -> {ok,State}.
