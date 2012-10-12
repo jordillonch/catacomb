@@ -14,7 +14,10 @@ execute(Cmd,State) -> %% State contains State data relevant to this module
 			%%  SessionId = ct_session_sup:get_new_session_pid(),
 			%%  ct_session:login(Status#status.session_pid,Login,Password),
 			%%  NewStatus=Status#status.session_pid=SessionPid, 
-			{ok,[]};
+			Session = ct_session_sup:get_new_session(),
+			io:format("Session ~p~n", [Session]),
+			ct_session:login(Session, User, Password),
+			{ok, []};
 		<<"get_character_list">> ->
 			%% CharacterList = ct_session:get_character_list(Status#status.session_pid),
 			{ok,[]};

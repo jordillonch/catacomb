@@ -9,6 +9,9 @@ c(ct_god).
 c(ct_config).
 
 ct_root_sup:start_link().
+
+{"command": "login","user": "joan Valduvieco","password": 34}
+
 ct_god:init_map().
 {ok,JoanPlayer}=ct_player_sup:start_player("joan",self(),[]).
 {ok,PerePlayer}=ct_player_sup:start_player("pere",self(),[]).

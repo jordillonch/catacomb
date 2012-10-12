@@ -3,6 +3,7 @@
 -export([handle_message/2]).
 
 -include("yaws_api.hrl").
+-include("../include/catacomb.hrl").
 
 %% define callback state to accumulate a fragmented WS message
 %% which we echo back when all fragments are in, returning to
@@ -93,4 +94,9 @@ handle_message(#ws_frame_info{opcode=close}, State) ->
 %% Catch all
 handle_message(#ws_frame_info{}=FrameInfo, State) ->
     io:format("WS Endpoint Unhandled message: ~p~n~p~n", [FrameInfo, State]),
-    {close, {error, {unhandled_message, FrameInfo}}}.
+    {close, {error, {unhandled_message, FrameInfo}}};
+
+%% Catch from catacomb
+handle_message(Msg, State) ->
+    io:format("Msg ~p~n", [Msg]),
+    {noreply, State}.
