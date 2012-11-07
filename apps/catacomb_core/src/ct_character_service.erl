@@ -15,7 +15,7 @@ start_link() ->
     gen_server:start_link({global,?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-	io:format("~s has started (~w)~n", [?MODULE,self()]),
+	lager:info("~s has started (~w)~n", [?MODULE,self()]),
     {ok, []}.
 stop() -> gen_server:cast({global,?MODULE}, stop).
 
@@ -32,7 +32,7 @@ handle_call({get_character_list, UserId}, _From, State) ->
 	% User2=#ct_character_info{id=32908230983,name="GeD",max_life_points=32000,life_points=15000},
 	% User3=#ct_character_info{id=32908230984,name="TITO",max_life_points=52000,life_points=100},
  %    {reply, {ok, [User1,User2,User3]}, State};
-    Result = emysql:execute(ct_auth_pool, "SELECT * FROM `character` WHERE user_id=" ++ emysql_util:encode(UserId)),
+    Result = emysql:execute(ct_auth_pool, "SELECT name,public_id,max_life_points,life_points,level FROM `character` WHERE user_id=" ++ emysql_util:encode(UserId)),
 	case Result of
 		#result_packet{rows=[]} ->
 			{reply, {ok, []}, State};
@@ -45,9 +45,9 @@ handle_call({get_character_list, UserId}, _From, State) ->
 			{reply, {error, sql_error}, State};
 		_ -> {reply, {error, sql_error}, State}
 	end;	
-handle_call({get_character_data,UserId,CharacterId}, _From, State) ->
+handle_call({get_character_data,UserId,PublicCharacterId}, _From, State) ->
 	%Get character data from DB
-	SQL=io_lib:format("SELECT * FROM `character` WHERE id=~s AND user_id=~s", [emysql_util:encode(CharacterId),emysql_util:encode(UserId)]),
+	SQL=io_lib:format("SELECT * FROM `character` WHERE public_id=~s AND user_id=~s", [emysql_util:encode(PublicCharacterId),emysql_util:encode(UserId)]),
     Result = emysql:execute(ct_auth_pool, SQL ),
 	case Result of
 		#result_packet{rows=[]} ->

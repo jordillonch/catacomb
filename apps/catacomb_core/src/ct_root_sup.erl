@@ -10,7 +10,7 @@ start_link() ->
 %% Using a SOFO strategy because we get to have many
 %% supervisees of the same type.
 init([]) ->
-    io:format("~s has started (~w)~n", [?MODULE,self()]),
+    lager:info("~s has started (~w)~n", [?MODULE,self()]),
     {ok,
      	{{one_for_one, 1, 60},
 			[{{global,ct_auth_service},
@@ -34,8 +34,11 @@ init([]) ->
         	{{global,ct_config_service},
         		{ct_config_service, start_link, []},
         		permanent, infinity, worker, [ct_config_service]},
-    		{{global,ct_god},
-        		{ct_god, start_link, []},
-        		permanent, infinity, worker, [ct_god]}
+            {{global,ct_god},
+                {ct_god, start_link, []},
+                permanent, infinity, worker, [ct_god]},
+    		{{global,ct_ai_sup},
+        		{ct_ai_sup, start_link, []},
+        		permanent, infinity, worker, [ct_ai_sup]}
         	]
         }}.
